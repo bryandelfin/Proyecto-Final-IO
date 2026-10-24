@@ -1,6 +1,34 @@
 from tkinter import *
 from tkinter import ttk
 
+entradas_restricciones = []
+
+def generar_restricciones():
+    global entradas_restricciones
+    for widget in frame_contenedor_restricciones.winfo_children():
+        widget.destroy()
+    entradas_restricciones.clear()
+    try:
+        num = int(combo_restricciones.get())
+    except ValueError:
+        return
+    for i in range(num):
+        label = Label(frame_contenedor_restricciones, text=f"Restric. {i+1}:")
+        label.grid(row=i, column=0, columnspan=2)
+        entry_v1=Entry(frame_contenedor_restricciones, width=5)
+        entry_v1.grid(row=i, column=2)
+        label=Label(frame_contenedor_restricciones, text="X1 +")
+        label.grid(row=i, column=3)
+        entry_v2=Entry(frame_contenedor_restricciones, width=5)
+        entry_v2.grid(row=i, column=4)
+        label=Label(frame_contenedor_restricciones, text="X2")
+        label.grid(row=i, column=5)
+        combo_desigualdad = ttk.Combobox(frame_contenedor_restricciones, values=["<=", ">=", "="], width=3, state="readonly")
+        combo_desigualdad.grid(row=i, column=6)
+        combo_desigualdad.set("<=")
+        entry_lado_derecho=Entry(frame_contenedor_restricciones, width=5)
+        entry_lado_derecho.grid(row=i, column=7)
+        entradas_restricciones.append((entry_v1, entry_v2, combo_desigualdad, entry_lado_derecho))
 root = Tk()
 root.title("Metodo grafico")
 root.geometry("1300x600")
@@ -28,8 +56,9 @@ label.grid(row=3, column=1)
 #Eleccion de tipo de optimizacion
 label = Label(frame_izq, text="Objetivo")
 label.grid(row=4, column=0)
-combo = ttk.Combobox(frame_izq, values=["Maximizar", "Minimizar"])  
+combo = ttk.Combobox(frame_izq, values=["Maximizar", "Minimizar"], state="readonly")  
 combo.grid(row=4, column=1)
+combo.set("Maximizar")
 #Variable 1 con entradas de nombre y valor
 label = Label(frame_izq, text="Variable 1")
 label.grid(row=5, column=1)
@@ -60,13 +89,17 @@ label = Label(frame_izq, text="Restricciones")
 label.grid(row=14, column=1)
 label = Label(frame_izq, text="No. Restricciones")
 label.grid(row=16, column=0)
-combo = ttk.Combobox(frame_izq, values=["1","2","3","4","5","6","7","8"])
-combo.grid(row=16, column=1)
-buttonGenerar = Button(frame_izq, text="Generar")
+combo_restricciones = ttk.Combobox(frame_izq, values=["1","2","3","4","5","6","7","8"], state="readonly")
+combo_restricciones.grid(row=16, column=1)
+combo_restricciones.set("1")
+buttonGenerar = Button(frame_izq, text="Generar", command=generar_restricciones)
 buttonGenerar.grid(row=17, column=1)
+#Contenedor de restricciones
+frame_contenedor_restricciones = ttk.LabelFrame(frame_izq)
+frame_contenedor_restricciones.grid(row=18, column=0, columnspan=2, sticky="ew", pady=10)
 # division
 separador = ttk.Separator(frame_izq, orient="horizontal")
-separador.grid(row=18, column=0, columnspan=2, sticky="ew", pady=10)
+separador.grid(row=19, column=0, columnspan=2, sticky="ew", pady=5)
 #Botones
 buttonResolver = Button(frame_izq, text="Resolver")
 buttonResolver.grid(row=19, column=1)
