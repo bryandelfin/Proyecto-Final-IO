@@ -36,28 +36,48 @@ def dibujar_restricciones(canvas, a, b, c, color="green"):
     ancho = canvas.winfo_width() or 800
     alto = canvas.winfo_height() or 600
     escala = 30
+    if c == 0:
+        p1= convertir_coordenadas(0, 0, alto, ancho, escala)
+        if a == 0 and b == 0:
+            return
+        if a == 0:
+            p2= convertir_coordenadas(0, 1000, alto, ancho, escala)
+            canvas.create_line(p1[0], p1[1], p2[0], p2[1], fill=color, width=2)
+            return
+        if b == 0:
+            p2= convertir_coordenadas(1000, 0, alto, ancho, escala)
+            canvas.create_line(p1[0], p1[1], p2[0], p2[1], fill=color, width=2)
+            return
+        else:
+            x1_cualquiera = 500
+            x2_cualquiera = (- a * x1_cualquiera) / b
+            p2= convertir_coordenadas(x1_cualquiera, x2_cualquiera, alto, ancho, escala)
 
-    #division entre 0
-    if b == 0 and a != 0:
-        x1 = c / a 
-        p1= convertir_coordenadas(x1, 0, alto, ancho, escala)
-        p2= convertir_coordenadas(x1, 1000, alto, ancho, escala)
+        
         canvas.create_line(p1[0], p1[1], p2[0], p2[1], fill=color, width=2)
         return
-    if a == 0 and b != 0:
-        y1 = c / b 
-        p1= convertir_coordenadas(0, y1, alto, ancho, escala)
-        p2= convertir_coordenadas(1000, y1, alto, ancho, escala)
-        canvas.create_line(p1[0], p1[1], p2[0], p2[1], fill=color, width=2)
-        return
-    
-    corte_y= c / b
-    corte_x= c / a
+    else:
+        #division entre 0
+        if b == 0 and a != 0:
+            x1 = c / a 
+            p1= convertir_coordenadas(x1, 0, alto, ancho, escala)
+            p2= convertir_coordenadas(x1, 1000, alto, ancho, escala)
+            canvas.create_line(p1[0], p1[1], p2[0], p2[1], fill=color, width=2)
+            return
+        if a == 0 and b != 0:
+            y1 = c / b 
+            p1= convertir_coordenadas(0, y1, alto, ancho, escala)
+            p2= convertir_coordenadas(1000, y1, alto, ancho, escala)
+            canvas.create_line(p1[0], p1[1], p2[0], p2[1], fill=color, width=2)
+            return
+        
+        corte_y= c / b
+        corte_x= c / a
 
-    punto_inicio= convertir_coordenadas(0, corte_y, alto, ancho, escala)
-    punto_final= convertir_coordenadas(corte_x, 0, alto, ancho, escala)
+        punto_inicio= convertir_coordenadas(0, corte_y, alto, ancho, escala)
+        punto_final= convertir_coordenadas(corte_x, 0, alto, ancho, escala)
 
-    canvas.create_line(punto_inicio[0], punto_inicio[1], punto_final[0], punto_final[1], fill=color, width=2)
+        canvas.create_line(punto_inicio[0], punto_inicio[1], punto_final[0], punto_final[1], fill=color, width=2)
 
 def resolver_y_dibujar(canvas):
     crear_plano(canvas)
