@@ -8,7 +8,7 @@ def resolver_modelo_grafico():
     try:
         c1 = float(panel_entrada.entry_valor1.get())
         c2 = float(panel_entrada.entry_valor2.get())
-        tipo_opt = panel_entrada.combo.get()
+        tipo_opt = panel_entrada.comboOp.get()
     except ValueError:
         raise ValueError("Ingrese valores numéricos válidos en la Función Objetivo.")
 
@@ -30,7 +30,7 @@ def resolver_modelo_grafico():
     restricciones_completas = restricciones + [(1, 0, ">=", 0), (0, 1, ">=", 0)]
     lineas = [(a, b, c) for a, b, op, c in restricciones_completas]
 
-    # Encontrar intersecciones
+    # Encontrar intersecciones (guardando valores exactos sin redondear prematuramente)
     puntos = []
     n = len(lineas)
     for i in range(n):
@@ -40,11 +40,10 @@ def resolver_modelo_grafico():
             det = (a1 * b2) - (a2 * b1)
             
             if abs(det) > 1e-5:
-                # Calcular punto de intersección
                 x = (c1_l * b2 - c2_l * b1) / det
                 y = (a1 * c2_l - a2 * c1_l) / det
                 if x >= -1e-5 and y >= -1e-5:
-                    puntos.append((round(max(0, x), 4), round(max(0, y), 4)))
+                    puntos.append((max(0.0, x), max(0.0, y)))
 
     # Filtrar puntos factibles
     puntos_factibles = []
@@ -61,9 +60,11 @@ def resolver_modelo_grafico():
             elif op == "=" and abs(val - c) > 1e-5:
                 factible = False
                 break
-        # Evitar puntos duplicados
-        if factible and (px, py) not in puntos_factibles:
-            puntos_factibles.append((px, py))
+        
+        # Redondear para evitar duplicados por errores de punto flotante
+        punto_redondeado = (round(px, 4), round(py, 4))
+        if factible and punto_redondeado not in puntos_factibles:
+            puntos_factibles.append(punto_redondeado)
 
     # CASO: INFACTIBLE
     if not puntos_factibles:
@@ -99,7 +100,8 @@ def resolver_modelo_grafico():
 
     mejor_z = max(z for _, z in evaluaciones) if tipo_opt == "Maximizar" else min(z for _, z in evaluaciones)
 
-    tol = 1e-4
+    # Tolerancia ligeramente más flexible para capturar óptimos alternativos exactos
+    tol = 1e-3
     puntos_optimos = [p for p, z in evaluaciones if abs(z - mejor_z) < tol]
     puntos_optimos = list(set(puntos_optimos))
 
