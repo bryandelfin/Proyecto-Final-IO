@@ -1,3 +1,6 @@
+# Módulo de lógica para el método gráfico
+# Método Gráfico - Investigación de Operaciones
+
 import panel_entrada
 from logica_restricciones import entradas_restricciones
 
@@ -19,7 +22,8 @@ def resolver_modelo_grafico():
             restricciones.append((a, b, op, c))
         except ValueError:
             raise ValueError(f"Verifique los valores numéricos en la Restricción {i+1}.")
-
+    
+    # Validar que existan restricciones
     if not restricciones:
         raise ValueError("No hay restricciones definidas. Pulsa 'Generar' primero.")
 
@@ -36,6 +40,7 @@ def resolver_modelo_grafico():
             det = (a1 * b2) - (a2 * b1)
             
             if abs(det) > 1e-5:
+                # Calcular punto de intersección
                 x = (c1_l * b2 - c2_l * b1) / det
                 y = (a1 * c2_l - a2 * c1_l) / det
                 if x >= -1e-5 and y >= -1e-5:
@@ -56,6 +61,7 @@ def resolver_modelo_grafico():
             elif op == "=" and abs(val - c) > 1e-5:
                 factible = False
                 break
+        # Evitar puntos duplicados
         if factible and (px, py) not in puntos_factibles:
             puntos_factibles.append((px, py))
 
@@ -101,7 +107,7 @@ def resolver_modelo_grafico():
 
     nombre_v1 = panel_entrada.entry_nombre1.get().strip() or "X1"
     nombre_v2 = panel_entrada.entry_nombre2.get().strip() or "X2"
-
+    
     return {
         "estado": estado,
         "tipo_opt": tipo_opt,
