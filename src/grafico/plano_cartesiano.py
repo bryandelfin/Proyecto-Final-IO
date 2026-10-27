@@ -22,6 +22,42 @@ def convertir_coordenadas(x, y, alto, ancho, escala=30):
     origen_x = 40
     origen_y = alto - 40
     
+def obtener_limites_canvas(canvas):
+    canvas.update_idletasks()
+    ancho = canvas.winfo_width()
+    if ancho < 10: ancho = 800
+    alto = canvas.winfo_height()
+    if alto < 10: alto = 600
+    return ancho, alto
+
+def calcular_escala_y_origen(restricciones, puntos_factibles, ancho_canvas, alto_canvas):
+    max_x = 10.0
+    max_y = 10.0
+
+    for px, py in puntos_factibles:
+        max_x = max(max_x, px)
+        max_y = max(max_y, py)
+
+    for a, b, op, c in restricciones:
+        if a != 0: max_x = max(max_x, abs(c / a))
+        if b != 0: max_y = max(max_y, abs(c / b))
+
+    max_x *= 1.25
+    max_y *= 1.25
+
+    margen = 50
+    escala_x = (ancho_canvas - 2 * margen) / max(max_x, 1.0)
+    escala_y = (alto_canvas - 2 * margen) / max(max_y, 1.0)
+    
+    escala = min(escala_x, escala_y)
+    escala = max(escala, 1.0)
+
+    origen_x = margen
+    origen_y = alto_canvas - margen
+
+    return escala, origen_x, origen_y
+
+def convertir_coordenadas(x, y, origen_x, origen_y, escala):
     pixel_x = origen_x + (x * escala)
     pixel_y = origen_y - (y * escala)
     return pixel_x, pixel_y
@@ -160,3 +196,64 @@ def resolver_y_dibujar(canvas):
         f"• Valor Óptimo (Z) = {round(resultado['mejor_z'], 4)}"
     )
     messagebox.showinfo("Resultado - Método Gráfico", mensaje)
+
+    restricciones = resultado.get("restricciones", [])
+    puntos_factibles = resultado.get("puntos_factibles", [])
+
+    # Dibujar plano y restricciones siempre
+    escala, origen_x, origen_y = crear_plano(canvas, restricciones, puntos_factibles)
+
+    colores = ["green", "blue", "orange", "purple", "brown", "magenta"]
+
+    for i, (a, b, op, c) in enumerate(restricciones):
+        color = colores[i % len(colores)]
+        dibujar_restriccion(canvas, a, b, c, alto, ancho, origen_x, origen_y, escala, color=color)
+
+    estado = resultado.get("estado", "")
+
+    if estado == "Infactible":
+        messagebox.showerror("Caso Especial Detectado", "¡El modelo es INFACTIBLE!\nNo existe ninguna región que cumpla todas las restricciones simultáneamente.")
+        return
+
+    if estado == "No Acotado":
+        for px, py in puntos_factibles:
+            cx, cy = convertir_coordenadas(px, py, origen_x, origen_y, escala)
+            canvas.create_oval(cx - 3, cy - 3, cx + 3, cy + 3, fill="blue", outline="black")
+        messagebox.showwarning("Caso Especial Detectado", "¡El modelo es NO ACOTADO!\nLa función objetivo puede crecer infinitamente sin violar las restricciones.")
+        return
+
+    for px, py in puntos_factibles:
+        cx, cy = convertir_coordenadas(px, py, origen_x, origen_y, escala)
+        canvas.create_oval(cx - 4, cy - 4, cx + 4, cy + 4, fill="blue", outline="black")
+
+    puntos_optimos = resultado.get("puntos_optimos", [])
+
+    if estado == "Empate":
+        if len(puntos_optimos) == 2:
+            p1_x, p1_y = puntos_optimos[0]
+            p2_x, p2_y = puntos_optimos[1]
+            c1_x, c1_y = convertir_coordenadas(p1_x, p1_y, origen_x, origen_y, escala)
+            c2_x, c2_y = convertir_coordenadas(p2_x, p2_y, origen_x, origen_y, escala)
+            canvas.create_line(c1_x, c1_y, c2_x, c2_y, fill="red", width=4)
+
+        for px, py in puntos_optimos:
+            px_opt, py_opt = convertir_coordenadas(px, py, origen_x, origen_y, escala)
+            canvas.create_oval(px_opt - 6, py_opt - 6, px_opt + 6, py_opt + 6, fill="red", outline="black", width=2)
+            canvas.create_text(px_opt + 25, py_opt - 12, text=f"Óptimo ({px}, {py})", fill="red", font=("Arial", 9, "bold"))
+        
+        mensaje = f"¡Empate Detectado (Múltiples Soluciones Óptimas)!\n\nValor Óptimo (Z) = {round(resultado.get('mejor_z', 0), 4)}"
+        messagebox.showinfo("Resultado - Método Gráfico", mensaje)
+
+    elif estado == "Unica" and puntos_optimos:
+        opt_x, opt_y = puntos_optimos[0]
+        px_opt, py_opt = convertir_coordenadas(opt_x, opt_y, origen_x, origen_y, escala)
+        canvas.create_oval(px_opt - 6, py_opt - 6, px_opt + 6, py_opt + 6, fill="red", outline="black", width=2)
+        canvas.create_text(px_opt + 25, py_opt - 12, text=f"Óptimo ({opt_x}, {opt_y})", fill="red", font=("Arial", 10, "bold"))
+
+        mensaje = (
+            f"¡Solución Óptima Única Encontrada ({resultado.get('tipo_opt', '')})!\n\n"
+            f"• {resultado.get('nombre_v1', 'X1')} = {opt_x}\n"
+            f"• {resultado.get('nombre_v2', 'X2')} = {opt_y}\n"
+            f"• Valor Óptimo (Z) = {round(resultado.get('mejor_z', 0), 4)}"
+        )
+        messagebox.showinfo("Resultado - Método Gráfico", mensaje)
