@@ -14,7 +14,7 @@ def aplicar_estilos_globales():
     style.theme_use("clam")
     
     # Paleta de colores
-    COLOR_BG_DARK = "#1D3557"      # Azul oscuro profesional para botones
+    COLOR_BG_DARK = "black"      # Azul oscuro profesional para botones
     COLOR_BG_HOVER = "#457B9D"     # Azul más claro para efecto hover
     COLOR_TEXTO_BLANCO = "#FFFFFF" # Texto blanco
     COLOR_FONDO_PANEL = "#F1FAEE"  # Fondo suave para paneles
