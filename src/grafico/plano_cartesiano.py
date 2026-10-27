@@ -113,6 +113,15 @@ def dibujar_restriccion(canvas, a, b, c, origen_x, origen_y, escala, color="gree
         p2 = convertir_coordenadas(1000, y1, origen_x, origen_y, escala)
         canvas.create_line(p1[0], p1[1], p2[0], p2[1], fill=color, width=2)
         return
+    # Caso especial: recta pasa por el origen (c == 0)
+    if abs(c) < 1e-12 and abs(a) > 1e-12 and abs(b) > 1e-12:
+        # Dibujar recta que pasa por (0,0) en ambas direcciones
+        p1 = convertir_coordenadas(0, 0, origen_x, origen_y, escala)
+        # Dirección perpendicular para trazar la recta
+        p2 = convertir_coordenadas(-b * 1000, a * 1000, origen_x, origen_y, escala)
+        p3 = convertir_coordenadas(b * 1000, -a * 1000, origen_x, origen_y, escala)
+        canvas.create_line(p2[0], p2[1], p3[0], p3[1], fill=color, width=2)
+        return
     
     # Caso general: calcular intersecciones con ejes
     puntos_recta = []

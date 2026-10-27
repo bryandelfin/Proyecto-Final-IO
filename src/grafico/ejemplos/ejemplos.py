@@ -5,9 +5,9 @@
 EJEMPLO_REAL = {
     "nombre": "Ejemplo 1 (Coffee Holding Co.)",
     "tipo_opt": "Minimizar",
-    "x1_nombre": "libras de café Arábica a comprar",
+    "x1_nombre": "Miles de libras de café Arábica a comprar",
     "x1_valor": 3.157,
-    "x2_nombre": "libras de café Robusta a comprar",
+    "x2_nombre": "Miles de libras de café Robusta a comprar",
     "x2_valor": 1.5803,
     "restricciones": [
         (1, 1, ">=", 44),
