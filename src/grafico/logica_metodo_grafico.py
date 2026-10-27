@@ -59,8 +59,15 @@ def resolver_modelo_grafico():
         if factible and (px, py) not in puntos_factibles:
             puntos_factibles.append((px, py))
 
+    # CASO: INFACTIBLE
     if not puntos_factibles:
-        return {"estado": "Infactible", "restricciones": restricciones}
+        return {
+            "estado": "Infactible",
+            "restricciones": restricciones,
+            "puntos_factibles": [],
+            "puntos_optimos": [],
+            "mejor_z": 0
+        }
 
     # Evaluar Z en los vértices factibles
     evaluaciones = []
@@ -68,21 +75,21 @@ def resolver_modelo_grafico():
         z = c1 * px + c2 * py
         evaluaciones.append(((px, py), z))
 
-    # Detección rigurosa de No Acotado:
-    # Si estamos maximizando y tenemos restricciones abiertas hacia arriba/derecha (ej. tipo '>=' sin cotas superiores que limiten Z)
-    # O si el valor de Z puede crecer evaluando hacia direcciones libres.
-    # En nuestro ejemplo de prueba no acotado: -x1 + x2 <= 2 y x2 >= 3, la región sube indefinidamente.
+    # Detección de No Acotado
     es_no_acotado = False
     if tipo_opt == "Maximizar":
-        # Verificamos si hay alguna restricción de tipo '>=' o si la región no tiene techo superior en dirección de la función objetivo
         tiene_cota_superior = any(op == "<=" and (a > 0 or b > 0) for a, b, op, c in restricciones)
-        # Si no hay restricciones '<=' restrictivas o si los coeficientes apuntan a apertura infinita
         if not tiene_cota_superior or any(a < 0 and op == "<=" for a, b, op, c in restricciones):
-            # Comprobación de que Z crece sin límite en los puntos extremos de la región abierta
             es_no_acotado = True
 
     if es_no_acotado:
-        return {"estado": "No Acotado", "restricciones": restricciones, "puntos_factibles": puntos_factibles}
+        return {
+            "estado": "No Acotado",
+            "restricciones": restricciones,
+            "puntos_factibles": puntos_factibles,
+            "puntos_optimos": [],
+            "mejor_z": 0
+        }
 
     mejor_z = max(z for _, z in evaluaciones) if tipo_opt == "Maximizar" else min(z for _, z in evaluaciones)
 

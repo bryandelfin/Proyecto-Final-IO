@@ -11,7 +11,6 @@ def obtener_limites_canvas(canvas):
     return ancho, alto
 
 def calcular_escala_y_origen(restricciones, puntos_factibles, ancho_canvas, alto_canvas):
-    # Encontrar el valor máximo en X y Y entre los puntos factibles y los interceptos con los ejes
     max_x = 10.0
     max_y = 10.0
 
@@ -23,20 +22,16 @@ def calcular_escala_y_origen(restricciones, puntos_factibles, ancho_canvas, alto
         if a != 0: max_x = max(max_x, abs(c / a))
         if b != 0: max_y = max(max_y, abs(c / b))
 
-    # Dejar un margen del 20% alrededor del gráfico
     max_x *= 1.25
     max_y *= 1.25
 
-    # Calcular escala de píxeles por unidad para que encaje en el canvas dejando un padding de 50px
     margen = 50
     escala_x = (ancho_canvas - 2 * margen) / max(max_x, 1.0)
     escala_y = (alto_canvas - 2 * margen) / max(max_y, 1.0)
     
-    # Usar la misma escala para X e Y para no distorsionar las proporciones geométricas
     escala = min(escala_x, escala_y)
-    escala = max(escala, 1.0) # Escala mínima de seguridad
+    escala = max(escala, 1.0)
 
-    # El origen (0,0) estará abajo a la izquierda con un pequeño margen
     origen_x = margen
     origen_y = alto_canvas - margen
 
@@ -52,11 +47,7 @@ def crear_plano(canvas, restricciones, puntos_factibles):
     canvas.delete("all")
 
     escala, origen_x, origen_y = calcular_escala_y_origen(restricciones, puntos_factibles, ancho, alto)
-
-    # Dibujar cuadrícula de referencia
-    paso_logico = max(1, int(100 / escala))
     
-    # Ejes principales
     canvas.create_line(origen_x, origen_y, ancho - 20, origen_y, fill="black", arrow=LAST, width=2)
     canvas.create_text(ancho - 10, origen_y + 15, text="X1", fill="black", font=("Arial", 11, "bold"))
     
@@ -66,7 +57,6 @@ def crear_plano(canvas, restricciones, puntos_factibles):
     return escala, origen_x, origen_y
 
 def dibujar_restriccion(canvas, a, b, c, alto, ancho, origen_x, origen_y, escala, color="green"):
-    # Encontrar puntos de corte con los ejes o fronteras del canvas visible
     x_max_visible = (ancho - origen_x) / escala
     y_max_visible = origen_y / escala
 
@@ -88,23 +78,19 @@ def dibujar_restriccion(canvas, a, b, c, alto, ancho, origen_x, origen_y, escala
             canvas.create_line(p1[0], p1[1], p2[0], p2[1], fill=color, width=2)
         return
 
-    # Corte con eje X (cuando y = 0)
     if a != 0:
         x_corte = c / a
         if x_corte >= 0:
             puntos_linea.append(convertir_coordenadas(x_corte, 0, origen_x, origen_y, escala))
 
-    # Corte con eje Y (cuando x = 0)
     if b != 0:
         y_corte = c / b
         if y_corte >= 0:
             puntos_linea.append(convertir_coordenadas(0, y_corte, origen_x, origen_y, escala))
 
-    # Si cruza ambos ejes dentro del rango positivo
     if len(puntos_linea) == 2:
         canvas.create_line(puntos_linea[0][0], puntos_linea[0][1], puntos_linea[1][0], puntos_linea[1][1], fill=color, width=2)
     elif len(puntos_linea) == 1:
-        # Extender hacia un punto aleatorio superior si la línea solo corta un eje
         p_extra = convertir_coordenadas(x_max_visible, max(0, (c - a * x_max_visible) / b), origen_x, origen_y, escala)
         canvas.create_line(puntos_linea[0][0], puntos_linea[0][1], p_extra[0], p_extra[1], fill=color, width=2)
 
@@ -117,20 +103,19 @@ def resolver_y_dibujar(canvas):
         messagebox.showerror("Error de validación", str(e))
         return
 
-    restricciones = resultado["restricciones"]
-    puntos_factibles = resultado["puntos_factibles"]
+    restricciones = resultado.get("restricciones", [])
+    puntos_factibles = resultado.get("puntos_factibles", [])
 
-    # Crear plano con escala adaptativa basada en los datos reales del problema
+    # Dibujar plano y restricciones siempre
     escala, origen_x, origen_y = crear_plano(canvas, restricciones, puntos_factibles)
 
     colores = ["green", "blue", "orange", "purple", "brown", "magenta"]
 
-    # 1. Dibujar restricciones adaptadas
     for i, (a, b, op, c) in enumerate(restricciones):
         color = colores[i % len(colores)]
         dibujar_restriccion(canvas, a, b, c, alto, ancho, origen_x, origen_y, escala, color=color)
 
-    estado = resultado["estado"]
+    estado = resultado.get("estado", "")
 
     if estado == "Infactible":
         messagebox.showerror("Caso Especial Detectado", "¡El modelo es INFACTIBLE!\nNo existe ninguna región que cumpla todas las restricciones simultáneamente.")
@@ -143,12 +128,11 @@ def resolver_y_dibujar(canvas):
         messagebox.showwarning("Caso Especial Detectado", "¡El modelo es NO ACOTADO!\nLa función objetivo puede crecer infinitamente sin violar las restricciones.")
         return
 
-    # 2. Rellenar o marcar región factible y vértices
     for px, py in puntos_factibles:
         cx, cy = convertir_coordenadas(px, py, origen_x, origen_y, escala)
         canvas.create_oval(cx - 4, cy - 4, cx + 4, cy + 4, fill="blue", outline="black")
 
-    puntos_optimos = resultado["puntos_optimos"]
+    puntos_optimos = resultado.get("puntos_optimos", [])
 
     if estado == "Empate":
         if len(puntos_optimos) == 2:
@@ -163,19 +147,19 @@ def resolver_y_dibujar(canvas):
             canvas.create_oval(px_opt - 6, py_opt - 6, px_opt + 6, py_opt + 6, fill="red", outline="black", width=2)
             canvas.create_text(px_opt + 25, py_opt - 12, text=f"Óptimo ({px}, {py})", fill="red", font=("Arial", 9, "bold"))
         
-        mensaje = f"¡Empate Detectado (Múltiples Soluciones Óptimas)!\n\nValor Óptimo (Z) = {round(resultado['mejor_z'], 4)}"
+        mensaje = f"¡Empate Detectado (Múltiples Soluciones Óptimas)!\n\nValor Óptimo (Z) = {round(resultado.get('mejor_z', 0), 4)}"
         messagebox.showinfo("Resultado - Método Gráfico", mensaje)
 
-    else:
+    elif estado == "Unica" and puntos_optimos:
         opt_x, opt_y = puntos_optimos[0]
         px_opt, py_opt = convertir_coordenadas(opt_x, opt_y, origen_x, origen_y, escala)
         canvas.create_oval(px_opt - 6, py_opt - 6, px_opt + 6, py_opt + 6, fill="red", outline="black", width=2)
         canvas.create_text(px_opt + 25, py_opt - 12, text=f"Óptimo ({opt_x}, {opt_y})", fill="red", font=("Arial", 10, "bold"))
 
         mensaje = (
-            f"¡Solución Óptima Única Encontrada ({resultado['tipo_opt']})!\n\n"
-            f"• {resultado['nombre_v1']} = {opt_x}\n"
-            f"• {resultado['nombre_v2']} = {opt_y}\n"
-            f"• Valor Óptimo (Z) = {round(resultado['mejor_z'], 4)}"
+            f"¡Solución Óptima Única Encontrada ({resultado.get('tipo_opt', '')})!\n\n"
+            f"• {resultado.get('nombre_v1', 'X1')} = {opt_x}\n"
+            f"• {resultado.get('nombre_v2', 'X2')} = {opt_y}\n"
+            f"• Valor Óptimo (Z) = {round(resultado.get('mejor_z', 0), 4)}"
         )
         messagebox.showinfo("Resultado - Método Gráfico", mensaje)
