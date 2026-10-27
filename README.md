@@ -1,6 +1,6 @@
 # Proyecto Final IO
 
-Aplicación educativa para resolver problemas de Investigación de Operaciones (IO) mediante el **método gráfico** y con estructura preparada para **programación dinámica**. Implementada en Python con interfaz gráfica en Tkinter.
+Aplicación educativa para resolver problemas de Investigación de Operaciones (IO) mediante el **método gráfico**. Implementada en Python con interfaz gráfica en Tkinter.
 
 ## Características
 
@@ -8,6 +8,7 @@ Aplicación educativa para resolver problemas de Investigación de Operaciones (
 - **Interfaz intuitiva**: Formulario para definir variables, número de restricciones, tipo de optimización (Maximizar/Minimizar), visualización en canvas interactivo.
 - **Validación de restricciones**: Soporta desigualdades `<=`, `>=`, `=`. Añade automáticamente restricciones de no-negatividad (`X1>=0`, `X2>=0`).
 - **Visualización completa**: Dibuja ejes, malla, líneas de restricción, puntos factibles y punto óptimo resaltado con su valor Z.
+- **Ejemplos precargados**: Incluye 3 ejemplos (editable, infactible, con óptimos alternativos) para facilitar el aprendizaje.
 - **Preparado para expansión**: Módulos separados (`src/grafico/`, `src/dinamica/`) para agregar programación dinámica próximamente.
 
 ## Requerimientos
@@ -15,7 +16,6 @@ Aplicación educativa para resolver problemas de Investigación de Operaciones (
 ### Software
 - Python 3.10+ (probado con Python 3.14.3)
 - pip (gestor de paquetes)
-- Git (opcional, para clonar)
 
 ### Dependencias
 Ver `requirements.txt`:
@@ -28,11 +28,12 @@ pytest==9.1.1
 ## Estructura de archivos
 
 ```
-Proyecto-Final-IO/
+Proyecto Final IO/
 ├── .gitignore
 ├── main.py                    # Punto de entrada desde raíz
 ├── README.md
 ├── requirements.txt
+├── estilos.py                 # Estilos globales de la interfaz
 ├── data/                      # Datos de entrada/ejemplos
 │   └── ejemplos/
 ├── docs/                      # Documentación
@@ -40,9 +41,13 @@ Proyecto-Final-IO/
 ├── src/
 │   ├── dinamica/              # Módulo para programación dinámica (en desarrollo)
 │   └── grafico/               # Módulo método gráfico
+│       ├── __init__.py
+│       ├── ejemplos/          # Módulo con ejemplos precargados
+│       │   ├── __init__.py
+│       │   └── ejemplos.py
 │       ├── logica_metodo_grafico.py  # Lógica de resolución y búsqueda de óptimo
 │       ├── logica_restricciones.py   # Generación dinámica de entradas de restricciones
-│       └── panel_entrada.py          # Interfaz gráfica Tkinter
+│       ├── panel_entrada.py          # Interfaz gráfica Tkinter
 │       └── plano_cartesiano.py       # Dibujo y visualización en canvas
 └── tests/                     # Pruebas unitarias (pytest)
 ```
@@ -52,7 +57,7 @@ Proyecto-Final-IO/
 ### 1. Clonar el repositorio
 ```bash
 git clone https://github.com/bryandelfin/Proyecto-Final-IO.git
-cd "Proyecto-Final-IO"
+cd "Proyecto Final IO"
 ```
 
 ### 2. Crear y activar entorno virtual
@@ -86,7 +91,9 @@ pip install -r requirements.txt
 python main.py
 ```
 
-### Desde el módulo gráfico
+Este comando iniciará la aplicación con los estilos globales aplicados.
+
+### Desde el módulo gráfico (alternativo)
 ```bash
 cd src/grafico
 python panel_entrada.py
@@ -96,8 +103,9 @@ python panel_entrada.py
 
 1. **Definir función objetivo**: Selecciona `Maximizar` o `Minimizar`. Ingresa nombres y coeficientes de `X1` y `X2`.
 2. **Definir restricciones**: Selecciona número de restricciones (1-8) y pulsa `Generar`. Completa coeficientes, operador (`<=`, `>=`, `=`) y lado derecho.
-3. **Resolver**: Pulsa `Resolver`. La aplicación graficará las restricciones, mostrará la región factible, puntos vértices y el punto óptimo con valor Z.
-4. **Limpiar/Cargar ejemplo**: Usa los botones correspondientes según necesidad.
+3. **Cargar ejemplos**: Usa el combobox "Ejemplos" para seleccionar entre los 3 ejemplos precargados (Editable, Infactible, Óptimos alternativos) y pulsa `Cargar Ejemplo`.
+4. **Resolver**: Pulsa `Resolver`. La aplicación graficará las restricciones, mostrará la región factible, puntos vértices y el punto óptimo con valor Z.
+5. **Limpiar**: Pulsa `Limpiar` para borrar todos los campos y reiniciar el plano.
 
 ## Buenas prácticas
 
@@ -105,7 +113,6 @@ python panel_entrada.py
 - **Control de versiones**: Seguir convención de commits (`feat:`, `fix:`, `docs:`, `chore:`). No subir archivos generados (`__pycache__/`, `.venv/`).
 - **Modularidad**: Lógica separada de interfaz (`logica_metodo_grafico.py`) facilita pruebas y mantenimiento.
 - **Validación**: Se validan entradas numéricas, región factible y restricciones.
-- **Ramas**: Desarrollo en ramas feature (ej. `interfaz-grafico`) con merges a `main` vía PR/revisión.
 - **Testing**: Ejecutar pruebas con `pytest` antes de hacer commit/push.
 - **Documentación**: Mantener `README.md` y `docs/` actualizados.
 
@@ -114,13 +121,6 @@ python panel_entrada.py
 ```bash
 pytest
 ```
-
-## Contribución
-
-1. Crear rama desde `main`: `git checkout -b feature/nombre-feature`
-2. Realizar cambios y commits descriptivos
-3. Subir rama: `git push -u origin feature/nombre-feature`
-4. Abrir Pull Request en GitHub
 
 ## Tecnologías
 

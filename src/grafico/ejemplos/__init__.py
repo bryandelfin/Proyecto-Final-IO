@@ -1,0 +1,4 @@
+# Módulo de ejemplos para cargar casos de prueba
+from .ejemplos import EJEMPLOS, EJEMPLO_REAL, EJEMPLO_INFACTIBLE, EJEMPLO_OPTIMOS_ALTERNATIVOS
+
+__all__ = ['EJEMPLOS', 'EJEMPLO_REAL', 'EJEMPLO_INFACTIBLE', 'EJEMPLO_OPTIMOS_ALTERNATIVOS']
