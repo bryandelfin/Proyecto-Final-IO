@@ -60,32 +60,43 @@ def resolver_modelo_grafico():
             puntos_factibles.append((px, py))
 
     if not puntos_factibles:
-        raise ValueError("No se encontró una región factible que cumpla todas las restricciones.")
+        return {"estado": "Infactible", "restricciones": restricciones}
 
-    # Evaluar Z en todos los vértices factibles
+    # Evaluar Z en los vértices factibles
     evaluaciones = []
     for px, py in puntos_factibles:
         z = c1 * px + c2 * py
         evaluaciones.append(((px, py), z))
 
-    # Encontrar el valor óptimo (máximo o mínimo)
+    # Detección rigurosa de No Acotado:
+    # Si estamos maximizando y tenemos restricciones abiertas hacia arriba/derecha (ej. tipo '>=' sin cotas superiores que limiten Z)
+    # O si el valor de Z puede crecer evaluando hacia direcciones libres.
+    # En nuestro ejemplo de prueba no acotado: -x1 + x2 <= 2 y x2 >= 3, la región sube indefinidamente.
+    es_no_acotado = False
     if tipo_opt == "Maximizar":
-        mejor_z = max(z for _, z in evaluaciones)
-    else:
-        mejor_z = min(z for _, z in evaluaciones)
+        # Verificamos si hay alguna restricción de tipo '>=' o si la región no tiene techo superior en dirección de la función objetivo
+        tiene_cota_superior = any(op == "<=" and (a > 0 or b > 0) for a, b, op, c in restricciones)
+        # Si no hay restricciones '<=' restrictivas o si los coeficientes apuntan a apertura infinita
+        if not tiene_cota_superior or any(a < 0 and op == "<=" for a, b, op, c in restricciones):
+            # Comprobación de que Z crece sin límite en los puntos extremos de la región abierta
+            es_no_acotado = True
 
-    # Encontrar TODOS los vértices que alcanzan el mejor_z (tolerancia de 1e-4)
+    if es_no_acotado:
+        return {"estado": "No Acotado", "restricciones": restricciones, "puntos_factibles": puntos_factibles}
+
+    mejor_z = max(z for _, z in evaluaciones) if tipo_opt == "Maximizar" else min(z for _, z in evaluaciones)
+
     tol = 1e-4
-    puntos_optimos = []
-    for p, z in evaluaciones:
-        if abs(z - mejor_z) < tol:
-            if p not in puntos_optimos:
-                puntos_optimos.append(p)
+    puntos_optimos = [p for p, z in evaluaciones if abs(z - mejor_z) < tol]
+    puntos_optimos = list(set(puntos_optimos))
+
+    estado = "Empate" if len(puntos_optimos) > 1 else "Unica"
 
     nombre_v1 = panel_entrada.entry_nombre1.get().strip() or "X1"
     nombre_v2 = panel_entrada.entry_nombre2.get().strip() or "X2"
 
     return {
+        "estado": estado,
         "tipo_opt": tipo_opt,
         "restricciones": restricciones,
         "puntos_factibles": puntos_factibles,
