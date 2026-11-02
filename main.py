@@ -9,11 +9,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Configurar rutas para acceder a los módulos del proyecto
 sys.path.insert(0, os.path.join(BASE_DIR, "src", "grafico"))
+sys.path.insert(0, os.path.join(BASE_DIR, "src", "dinamica"))
 sys.path.insert(0, os.path.join(BASE_DIR, "src", "menu"))
 
 from estilos import aplicar_estilos_globales
 from menu import Menu
-
 # Opción elegida en el menú de bienvenida
 seleccion = {"tipo": None}
 
@@ -24,34 +24,33 @@ def iniciar_interfaz_principal(tipo_metodo):
 
 
 def abrir_panel(tipo_metodo):
-    """Abre la interfaz del método gráfico con la opción seleccionada."""
+    """Abre SOLO el panel que corresponde al botón elegido en el menú."""
     import importlib
 
-    import logica_restricciones
-    import panel_entrada
+    # Cada panel crea su propia ventana (root = Tk()) en el mismo instante en
+    # que se importa. Por eso hay que importar únicamente el que se eligió:
+    # si se importaran los dos, se abrirían dos ventanas a la vez.
+    if tipo_metodo == "comprar":
+        nombre_modulo = "panel_formulario"  # Programación dinámica
+    else:
+        nombre_modulo = "panel_entrada"  # Método gráfico
 
-    # Al volver al menú, el panel anterior fue destruido: se reconstruye.
-    if getattr(panel_entrada, "_iniciado", False):
-        importlib.reload(panel_entrada)
-    panel_entrada._iniciado = True
-    logica_restricciones.entradas_restricciones.clear()
+    # Al volver al menú, la ventana anterior de ese panel fue destruida.
+    # Se descarta el módulo en memoria para que, al importarlo de nuevo,
+    # se construya una ventana nueva.
+    sys.modules.pop(nombre_modulo, None)
+    panel = importlib.import_module(nombre_modulo)
+
+    if tipo_metodo != "comprar":
+        import logica_restricciones
+
+        logica_restricciones.entradas_restricciones.clear()
 
     aplicar_estilos_globales()
+    panel.root.mainloop()
 
-    if tipo_metodo == "comprar":
-        def cargar_ejemplo_compra():
-            panel_entrada.combo_ejemplos.current(0)
-            panel_entrada.cargar_ejemplo_seleccionado(
-                panel_entrada.canvas,
-                panel_entrada.frame_contenedor_restricciones,
-            )
-
-        panel_entrada.root.after(200, cargar_ejemplo_compra)
-
-    panel_entrada.root.mainloop()
-
-    # True si el usuario pulsó "Volver al menú".
-    return getattr(panel_entrada.root, "volver_al_menu", False)
+    # True si el usuario pulsó "Volver al menú" en ESE panel.
+    return getattr(panel.root, "volver_al_menu", False)
 
 
 if __name__ == "__main__":
