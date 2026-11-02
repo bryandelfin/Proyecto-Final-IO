@@ -9,6 +9,7 @@ from tkinter import ttk, messagebox
 
 import plano_cartesiano
 from logica_metodo_grafico import resolver_modelo_grafico
+from visual_extra import dibujar_leyenda, sombrear_region_factible
 
 
 class _MessageboxSilencioso:
@@ -183,6 +184,10 @@ def resolver_y_mostrar(canvas, frame_resultados):
         plano_cartesiano.resolver_y_dibujar(canvas)
     finally:
         plano_cartesiano.messagebox = messagebox_original
+
+    restricciones = resultado.get("restricciones", [])
+    sombrear_region_factible(canvas, restricciones, resultado.get("puntos_factibles", []))
+    dibujar_leyenda(canvas, restricciones)
 
     coeficientes = _obtener_coeficientes()
     if coeficientes is None:
