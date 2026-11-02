@@ -14,10 +14,15 @@ def aplicar_estilos_globales():
     style.theme_use("clam")
     
     # Paleta de colores
-    COLOR_BG_DARK = "black"      # Azul oscuro profesional para botones
-    COLOR_BG_HOVER = "#457B9D"     # Azul más claro para efecto hover
+    # Paleta del menú
+    COLOR_DORADO = "#B8912F"
+    COLOR_DORADO_HOVER = "#D4AF37"
+    COLOR_FONDO = "#F7F5EF"
+    COLOR_TEXTO = "#2B2D42"
+    COLOR_BG_DARK = "#B8912F"      # Azul oscuro profesional para botones
+    COLOR_BG_HOVER = "#D4AF37"     # Azul más claro para efecto hover
     COLOR_TEXTO_BLANCO = "#FFFFFF" # Texto blanco
-    COLOR_FONDO_PANEL = "#F1FAEE"  # Fondo suave para paneles
+    COLOR_FONDO_PANEL = "#F7F5EF"  # Fondo suave para paneles
     COLOR_BORDE = "#A8DADC"        # Color de bordes
     
     # Configuración global de botones ttk.Button

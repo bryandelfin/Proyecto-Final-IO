@@ -8,6 +8,11 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from logica_restricciones import crear_restricciones_dinamicas, entradas_restricciones
 from plano_cartesiano import resolver_y_dibujar, crear_plano
 from ejemplos import EJEMPLOS
+from panel_resultados import (
+    crear_panel_resultados,
+    limpiar_resultados,
+    resolver_y_mostrar,
+)
 
 # Variable global para mantener referencia a la ventana principal
 root = Tk()
@@ -40,6 +45,9 @@ def limpiar_todo(canvas_widget, frame_contenedor):
     
     # Limpiar lista de entradas de restricciones
     entradas_restricciones.clear()
+
+    # Limpiar tabla de resultados
+    limpiar_resultados(frame_resultados)
 
 def cargar_ejemplo_seleccionado(canvas_widget, frame_contenedor):
     """
@@ -88,7 +96,7 @@ def cargar_ejemplo_seleccionado(canvas_widget, frame_contenedor):
                 entry_c.insert(0, str(c))
         
         # Resolver y dibujar automáticamente
-        resolver_y_dibujar(canvas_widget)
+        resolver_y_mostrar(canvas_widget, frame_resultados)
         
     except Exception as e:
         messagebox.showerror("Error", f"Error al cargar ejemplo: {str(e)}")
@@ -103,14 +111,48 @@ root.columnconfigure(0, weight=0)
 root.columnconfigure(1, weight=3)
 root.rowconfigure(0, weight=1)
 
-# Frame izquierdo - Panel de entrada (más compacto)
-frame_izq = ttk.LabelFrame(root, text="Modelo Matemático", padding=6)
-frame_izq.grid(row=0, column=0, sticky="nsew", padx=2, pady=2)
+# Frame izquierdo - Panel de entrada con scroll
+contenedor_izq = ttk.LabelFrame(root, text="Modelo Matemático", padding=0)
+contenedor_izq.grid(row=0, column=0, sticky="nsew", padx=2, pady=2)
+contenedor_izq.columnconfigure(0, weight=1)
+contenedor_izq.rowconfigure(0, weight=1)
+
+canvas_form = Canvas(contenedor_izq, bg="#F7F5EF", highlightthickness=0)
+scroll_form = ttk.Scrollbar(contenedor_izq, orient="vertical", command=canvas_form.yview)
+canvas_form.configure(yscrollcommand=scroll_form.set)
+canvas_form.grid(row=0, column=0, sticky="nsew")
+scroll_form.grid(row=0, column=1, sticky="ns")
+
+frame_izq = Frame(canvas_form, bg="#F7F5EF", padx=6, pady=6)
 frame_izq.columnconfigure(1, weight=1)
+ventana_form = canvas_form.create_window((0, 0), window=frame_izq, anchor="nw")
+
+
+def _ajustar_form(_event=None):
+    canvas_form.configure(scrollregion=canvas_form.bbox("all"))
+    canvas_form.itemconfigure(ventana_form, width=canvas_form.winfo_width())
+
+
+def _rueda_form(event):
+    widget = root.winfo_containing(event.x_root, event.y_root)
+    while widget is not None:
+        if widget is contenedor_izq:
+            canvas_form.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            return "break"
+        widget = getattr(widget, "master", None)
+
+
+frame_izq.bind("<Configure>", _ajustar_form)
+canvas_form.bind("<Configure>", _ajustar_form)
+root.bind_all("<MouseWheel>", _rueda_form)
 
 # Canvas para el plano cartesiano
 canvas = Canvas(root, bg="white", highlightthickness=1, highlightbackground="gray")
 canvas.grid(row=0, column=1, sticky="nsew", padx=2, pady=2)
+
+# Panel inferior con la tabla de resultados
+frame_resultados = crear_panel_resultados(root)
+frame_resultados.grid(row=1, column=0, columnspan=2, sticky="ew", padx=2, pady=(0, 2))
 
 # Encabezado
 label_titulo = Label(frame_izq, text="Gestión de Ganancias", font=("Arial", 8, "bold"))
@@ -192,10 +234,18 @@ separador4 = ttk.Separator(frame_izq, orient="horizontal")
 separador4.grid(row=19, column=0, columnspan=2, sticky="ew", pady=4)
 
 # Botones de acción
-buttonResolver = ttk.Button(frame_izq, text="Resolver", command=lambda: resolver_y_dibujar(canvas))
+buttonResolver = ttk.Button(frame_izq, text="Resolver", command=lambda: resolver_y_mostrar(canvas, frame_resultados))
 buttonResolver.grid(row=20, column=0, sticky="ew", padx=1, pady=1)
 buttonLimpiar = ttk.Button(frame_izq, text="Limpiar", command=lambda: limpiar_todo(canvas, frame_contenedor_restricciones))
 buttonLimpiar.grid(row=20, column=1, sticky="ew", padx=1, pady=1)
+
+# Botón para regresar al menú de bienvenida
+def volver_al_menu():
+    root.volver_al_menu = True
+    root.destroy()
+
+buttonVolver = ttk.Button(root, text="← Volver al menú", command=volver_al_menu)
+buttonVolver.place(relx=1.0, x=-12, y=10, anchor="ne")
 
 # Inicializar plano cartesiano
 crear_plano(canvas)
