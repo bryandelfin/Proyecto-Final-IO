@@ -10,6 +10,7 @@ from tkinter import ttk, messagebox
 import plano_cartesiano
 from logica_metodo_grafico import resolver_modelo_grafico
 from visual_extra import dibujar_leyenda, sombrear_region_factible
+from verificador import verificar_grafico
 
 
 class _MessageboxSilencioso:
@@ -65,7 +66,13 @@ def crear_panel_resultados(parent):
     tabla.grid(row=2, column=0, sticky="nsew")
     scroll.grid(row=2, column=1, sticky="ns")
 
+    # Línea de verificación
+    verificacion = ttk.Label(frame, text="", anchor="w", font=("Segoe UI", 9, "bold"),
+                             wraplength=1000)
+    verificacion.grid(row=3, column=0, columnspan=2, sticky="ew", padx=2, pady=(4, 0))
+
     frame.tabla = tabla
+    frame.verificacion = verificacion
     frame.resumen = resumen
     frame.detalle = detalle
     return frame
@@ -93,6 +100,7 @@ def limpiar_resultados(frame, mensaje="Sin resultados todavía."):
     frame.tabla.delete(*frame.tabla.get_children())
     frame.resumen.configure(text=mensaje, foreground="#2B2D42")
     frame.detalle.configure(text="")
+    frame.verificacion.configure(text="")
 
 
 def _nombre_variable(nombre, indice):
@@ -196,3 +204,25 @@ def resolver_y_mostrar(canvas, frame_resultados):
         c1, c2 = coeficientes
 
     mostrar_resultados(frame_resultados, resultado, c1, c2)
+
+    # Verificación del resultado
+    mostrar_verificacion(frame_resultados, resultado, c1, c2)
+
+
+def mostrar_verificacion(frame, resultado, c1, c2):
+    """Verifica el resultado y lo muestra en el panel."""
+    if c1 is None or c2 is None:
+        return
+    try:
+        import panel_entrada
+        tipo_opt = panel_entrada.comboOp.get()
+        ok, msg = verificar_grafico(c1, c2, tipo_opt, resultado.get("restricciones", []), resultado)
+    except Exception as error:          # si la verificación falla, el programa sigue funcionando
+        ok, msg = None, f"No se pudo verificar: {error}"
+    if ok is True:
+        texto, color = f"Verificado: {msg}", "#1B7F3B"
+    elif ok is False:
+        texto, color = f"No coincide con la verificación: {msg}", "#B00020"
+    else:
+        texto, color = f"Verificación no disponible: {msg}", "#6B6B6B"
+    frame.verificacion.configure(text=texto, foreground=color)
