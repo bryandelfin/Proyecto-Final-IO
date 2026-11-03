@@ -1,5 +1,3 @@
-# Módulo de lógica para el método gráfico
-# Método Gráfico - Investigación de Operaciones
 
 import panel_entrada
 from logica_restricciones import entradas_restricciones
@@ -23,14 +21,14 @@ def resolver_modelo_grafico():
         except ValueError:
             raise ValueError(f"Verifique los valores numéricos en la Restricción {i+1}.")
     
-    # Validar que existan restricciones
+   
     if not restricciones:
         raise ValueError("No hay restricciones definidas. Pulsa 'Generar' primero.")
 
     restricciones_completas = restricciones + [(1, 0, ">=", 0), (0, 1, ">=", 0)]
     lineas = [(a, b, c) for a, b, op, c in restricciones_completas]
 
-    # Encontrar intersecciones (guardando valores exactos sin redondear prematuramente)
+    
     puntos = []
     n = len(lineas)
     for i in range(n):
@@ -45,7 +43,7 @@ def resolver_modelo_grafico():
                 if x >= -1e-5 and y >= -1e-5:
                     puntos.append((max(0.0, x), max(0.0, y)))
 
-    # Filtrar puntos factibles
+    
     puntos_factibles = []
     for px, py in puntos:
         factible = True
@@ -61,12 +59,12 @@ def resolver_modelo_grafico():
                 factible = False
                 break
         
-        # Redondear para evitar duplicados por errores de punto flotante
+        
         punto_redondeado = (round(px, 4), round(py, 4))
         if factible and punto_redondeado not in puntos_factibles:
             puntos_factibles.append(punto_redondeado)
 
-    # CASO: INFACTIBLE
+    
     if not puntos_factibles:
         return {
             "estado": "Infactible",
@@ -76,13 +74,13 @@ def resolver_modelo_grafico():
             "mejor_z": 0
         }
 
-    # Evaluar Z en los vértices factibles
+    
     evaluaciones = []
     for px, py in puntos_factibles:
         z = c1 * px + c2 * py
         evaluaciones.append(((px, py), z))
 
-    # Detección de No Acotado
+    
     es_no_acotado = False
     if tipo_opt == "Maximizar":
         tiene_cota_superior = any(op == "<=" and (a > 0 or b > 0) for a, b, op, c in restricciones)
@@ -100,7 +98,7 @@ def resolver_modelo_grafico():
 
     mejor_z = max(z for _, z in evaluaciones) if tipo_opt == "Maximizar" else min(z for _, z in evaluaciones)
 
-    # Tolerancia ligeramente más flexible para capturar óptimos alternativos exactos
+    
     tol = 1e-3
     puntos_optimos = [p for p, z in evaluaciones if abs(z - mejor_z) < tol]
     puntos_optimos = list(set(puntos_optimos))
