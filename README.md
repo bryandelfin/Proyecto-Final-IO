@@ -32,9 +32,10 @@ Al iniciar, la aplicación muestra un menú de bienvenida donde se elige qué ca
   sudo apt install python3-tk
   ```
 
-El proyecto **no usa dependencias externas de Python**: todo se implementa con la
-biblioteca estándar (`tkinter`, `math`). Por eso `requirements.txt` solo contiene
-comentarios y `pip install -r requirements.txt` no instala paquetes adicionales.
+La aplicación principal (método gráfico y programación dinámica) funciona solo con
+la biblioteca estándar (`tkinter`, `math`). La **verificación cruzada de resultados**
+usa `numpy` y `scipy`, y por eso `requirements.txt` las incluye para que todas las
+funciones queden disponibles tras instalar las dependencias.
 
 ## Estructura del proyecto
 
@@ -42,7 +43,8 @@ comentarios y `pip install -r requirements.txt` no instala paquetes adicionales.
 Proyecto Final IO/
 ├── main.py                          # Punto de entrada (menú + paneles)
 ├── estilos.py                       # Estilos globales de la interfaz
-├── requirements.txt                 # Sin dependencias externas
+├── requirements.txt                 # NumPy y SciPy (verificación)
+├── requirements-verificacion.txt    # Dependencias opcionales de verificación
 ├── README.md
 ├── docs/
 │   └── especificaciones-grafico.md
@@ -101,8 +103,8 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-> No se instalan paquetes externos porque el proyecto solo usa la biblioteca
-> estándar. Asegúrate de tener Tkinter disponible (ver Requerimientos).
+> Instala NumPy y SciPy para habilitar la verificación cruzada. Asegúrate de
+> tener Tkinter disponible (ver Requerimientos).
 
 ## Ejecución
 

@@ -1,13 +1,12 @@
 # Dependencias del proyecto
 #
-# Esta aplicación usa únicamente la biblioteca estándar de Python
-# (tkinter para la interfaz gráfica y math para los cálculos), por lo
-# que no requiere paquetes externos.
+# La aplicación (método gráfico y programación dinámica) usa Tkinter y la
+# biblioteca estándar de Python. Adicionalmente, la verificación cruzada de
+# resultados con SciPy necesita NumPy y SciPy.
 #
-# En Windows, tkinter viene incluido con la instalación oficial de Python.
-# En Linux puede ser necesario instalarlo con el gestor de paquetes del
-# sistema, por ejemplo:
+# En Windows, Tkinter viene incluido con la instalación oficial de Python.
+# En Linux puede ser necesario instalarlo aparte:
 #   sudo apt install python3-tk
-#
-# Ejecuta `pip install -r requirements.txt` sin problema: no instala nada
-# porque no hay dependencias externas.
+
+numpy==2.5.4
+scipy==1.18.1
