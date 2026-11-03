@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import ttk, messagebox
 from logica_programacion_dinamica import resolver_programacion_dinamica
 from panel_tablas import PanelTablasDinamicas
+from verificador import verificar_dp_inventario
 import sys, os
 
 # Configuración de rutas para importar módulos locales
@@ -232,11 +233,13 @@ def resolver_modelo():
 
         # 3. Construir la lista de etapas para el algoritmo de PD
         etapas_data = []
+        lista_d, lista_p, lista_h, lista_m = [], [], [], []   # para la verificación
         for idx, et in enumerate(entradas_etapas):
             d = float(et["demanda"].get())
             p = float(et["precio"].get())
             h = float(et["almacenar"].get())
             m = float(et["compra_max"].get())
+            lista_d.append(d); lista_p.append(p); lista_h.append(h); lista_m.append(m)
 
             # Definición de la función de costo inmediato para inventarios:
             # Costo = (Precio * Compra) + (Costo_Almacenar * Inventario_Resultante)
@@ -279,6 +282,20 @@ def resolver_modelo():
             capacidad_inicial=inv_inicial
         )
 
+        # Verificación del resultado
+        try:
+            ok, msg = verificar_dp_inventario(lista_d, lista_p, lista_h, inv_inicial,
+                                              inv_final, 0.0, capacidad_max, lista_m,
+                                              resultado, paso)
+        except Exception as error:      # si la verificación falla, el programa sigue funcionando
+            ok, msg = None, f"No se pudo verificar: {error}"
+        if ok is True:
+            label_verificacion.config(text=f"Verificado: {msg}", fg="#1B7F3B")
+        elif ok is False:
+            label_verificacion.config(text=f"No coincide con la verificación: {msg}", fg="#B00020")
+        else:
+            label_verificacion.config(text=f"Verificación no disponible: {msg}", fg="#6B6B6B")
+
         if resultado["estado"] == "Infactible":
             messagebox.showwarning("Modelo Infactible", "El modelo no encontró una solución factible con los parámetros y restricciones dadas.")
             return
@@ -305,6 +322,10 @@ def limpiar_campos():
 
 buttonLimpiar = ttk.Button(frame_izq, text="Limpiar", command=limpiar_campos)
 buttonLimpiar.grid(row=21, column=1, sticky="ew", padx=1, pady=1)
+
+# Resultado de la verificación (abajo de la ventana, siempre visible)
+label_verificacion = Label(root, text="", font=("Arial", 9, "bold"), anchor="w", justify="left")
+label_verificacion.grid(row=1, column=0, columnspan=2, sticky="ew", padx=6, pady=4)
 
 # Botón para regresar al menú de bienvenida
 def volver_al_menu():
