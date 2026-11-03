@@ -11,6 +11,7 @@ import plano_cartesiano
 from logica_metodo_grafico import resolver_modelo_grafico
 from visual_extra import dibujar_leyenda, sombrear_region_factible
 from verificador import verificar_grafico
+from panel_sensibilidad import PanelSensibilidad
 
 
 class _MessageboxSilencioso:
@@ -66,6 +67,13 @@ def crear_panel_resultados(parent):
     tabla.grid(row=2, column=0, sticky="nsew")
     scroll.grid(row=2, column=1, sticky="ns")
 
+    # Análisis de sensibilidad junto a la solución
+    frame.sensibilidad = PanelSensibilidad(frame)
+    frame.columnconfigure(2, weight=1)
+    frame.sensibilidad.frame.grid(
+        row=0, column=2, rowspan=4, sticky="nsew", padx=(8, 2), pady=2
+    )
+
     # Línea de verificación
     verificacion = ttk.Label(frame, text="", anchor="w", font=("Segoe UI", 9, "bold"),
                              wraplength=1000)
@@ -101,6 +109,9 @@ def limpiar_resultados(frame, mensaje="Sin resultados todavía."):
     frame.resumen.configure(text=mensaje, foreground="#2B2D42")
     frame.detalle.configure(text="")
     frame.verificacion.configure(text="")
+    sensibilidad = getattr(frame, "sensibilidad", None)
+    if sensibilidad is not None:
+        sensibilidad.limpiar()
 
 
 def _nombre_variable(nombre, indice):
@@ -175,6 +186,10 @@ def mostrar_resultados(frame, resultado, c1, c2):
             values=(i, _formatear(px), _formatear(py), _formatear(z)),
             tags=("optimo",) if es_optimo else (),
         )
+
+    sensibilidad = getattr(frame, "sensibilidad", None)
+    if sensibilidad is not None:
+        sensibilidad.actualizar(resultado, c1, c2)
 
 
 def resolver_y_mostrar(canvas, frame_resultados):
