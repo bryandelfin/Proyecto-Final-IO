@@ -232,21 +232,31 @@ def resolver_modelo():
             m = float(et["compra_max"].get())
             lista_d.append(d); lista_p.append(p); lista_h.append(h); lista_m.append(m)
 
+            es_ultima_etapa = (idx == num_etapas - 1)
+
             def f_costo_inventario(s, x, demanda_etapa=d, precio_etapa=p, almacen_etapa=h):
                 costo_compra = precio_etapa * x
                 inv_restante = s + x - demanda_etapa
                 costo_almacenamiento = almacen_etapa * inv_restante
                 return costo_compra + costo_almacenamiento
 
-            def transicion_inventario(s, x, demanda_etapa=d):
-                return s + x - demanda_etapa
+            def transicion_inventario(s, x, demanda_etapa=d, final_min=inv_final,
+                                      ultima=es_ultima_etapa):
+                s_sig = s + x - demanda_etapa
+                # En la última etapa el inventario final debe cumplir el objetivo (IN)
+                if ultima and s_sig < final_min - 1e-5:
+                    raise ValueError("inventario final insuficiente")
+                return s_sig
 
-            def decisiones_permitidas(s, compra_max=m, cap_max=capacidad_max, demanda_etapa=d):
+            def decisiones_permitidas(s, compra_max=m, cap_max=capacidad_max,
+                                      demanda_etapa=d, final_min=inv_final,
+                                      ultima=es_ultima_etapa):
                 decisiones = []
                 x_val = 0.0
                 while x_val <= compra_max + 1e-5:
                     s_sig = s + x_val - demanda_etapa
-                    if 0 <= s_sig <= cap_max:
+                    cumple_final = (not ultima) or (s_sig >= final_min - 1e-5)
+                    if 0 <= s_sig <= cap_max and cumple_final:
                         decisiones.append(round(x_val, 4))
                     x_val += paso
                 return decisiones
@@ -316,3 +326,26 @@ def volver_al_menu():
 
 buttonVolver = ttk.Button(root, text="← Volver al menú", command=volver_al_menu)
 buttonVolver.place(relx=1.0, x=-12, y=10, anchor="ne")
+
+# ==========================================
+# 5. CARGA DE EJEMPLOS (módulo adicional, no altera la lógica existente)
+# ==========================================
+from ejemplos_dinamica import agregar_seccion_ejemplos
+
+contexto_ejemplos = {
+    "entry_nombre_problema": entry_nombre_problema,
+    "entry_nombre_etapa": entry_nombre_etapa,
+    "entry_unidad_producto": entry_unidad_producto,
+    "entry_unidad_monetaria": entry_unidad_monetaria,
+    "entry_inv_inicial": entry_inv_inicial,
+    "entry_inv_final": entry_inv_final,
+    "entry_capacidad_max": entry_capacidad_max,
+    "entry_paso": entry_paso,
+    "comboOp": comboOp,
+    "combo_etapas": combo_etapas,
+    "entradas_etapas": entradas_etapas,
+    "crear_etapas_dinamicas": crear_etapas_dinamicas,
+    "resolver_modelo": resolver_modelo,
+}
+
+agregar_seccion_ejemplos(frame_izq, contexto_ejemplos, fila=5)
