@@ -81,11 +81,33 @@ def resolver_modelo_grafico():
         evaluaciones.append(((px, py), z))
 
     
+    def es_direccion_recesion(dx, dy):
+        for a, b, op, c in restricciones_completas:
+            valor = a * dx + b * dy
+            if op == "<=" and valor > 1e-7:
+                return False
+            if op == ">=" and valor < -1e-7:
+                return False
+            if op == "=" and abs(valor) > 1e-7:
+                return False
+        return True
+
+    candidatas = [(1.0, 0.0), (0.0, 1.0)]
+    for a, b, op, c in restricciones_completas:
+        if abs(a) + abs(b) > 1e-9:
+            candidatas.append((b, -a))
+            candidatas.append((-b, a))
+
     es_no_acotado = False
-    if tipo_opt == "Maximizar":
-        tiene_cota_superior = any(op == "<=" and (a > 0 or b > 0) for a, b, op, c in restricciones)
-        if not tiene_cota_superior or any(a < 0 and op == "<=" for a, b, op, c in restricciones):
+    for dx, dy in candidatas:
+        if abs(dx) + abs(dy) < 1e-9 or not es_direccion_recesion(dx, dy):
+            continue
+        mejora = c1 * dx + c2 * dy
+        if (tipo_opt == "Maximizar" and mejora > 1e-7) or (
+            tipo_opt == "Minimizar" and mejora < -1e-7
+        ):
             es_no_acotado = True
+            break
 
     if es_no_acotado:
         return {

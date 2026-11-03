@@ -1,5 +1,5 @@
 # Pruebas automáticas del módulo de verificación (y del software que verifica).
-# Ejecutar desde la raíz del proyecto:   python -m pytest tests -v
+# Ejecutar desde la raíz del proyecto:   python -m pytest src/test -v
 # No necesitan interfaz gráfica: se simulan los campos de entrada de Tkinter.
 import os
 import sys
@@ -8,8 +8,8 @@ import types
 import pytest
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(RAIZ, "src", "grafico"))
-sys.path.insert(0, os.path.join(RAIZ, "src", "dinamica"))
+sys.path.insert(0, os.path.join(RAIZ, "grafico"))
+sys.path.insert(0, os.path.join(RAIZ, "dinamica"))
 
 pytest.importorskip("scipy")      # la verificación necesita SciPy
 import verificador as vf
