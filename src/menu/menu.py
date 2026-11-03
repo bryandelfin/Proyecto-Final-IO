@@ -50,7 +50,7 @@ class Menu:
         # Título alineado a la izquierda
         titulo = tk.Label(
             contenedor,
-            text="¿Qué deseas calcular hoy?",
+            text="Bienvenido \n¿Qué deseas calcular hoy?",
             font=("Segoe UI", 20, "bold"),
             fg=COLOR_TEXTO,
             bg=COLOR_FONDO,
@@ -69,11 +69,11 @@ class Menu:
         opciones.grid(row=2, column=0, sticky="ew", padx=40)
         opciones.columnconfigure(0, weight=1)
 
-        self._crear_fila(opciones, 0, "Cuánto comprar", "comprar")
+        self._crear_fila(opciones, 0, "Cuánto comprar - (Programación Dinámica)", "comprar")
         ttk.Separator(opciones, orient="horizontal").grid(
             row=1, column=0, columnspan=2, sticky="ew", pady=12
         )
-        self._crear_fila(opciones, 2, "Cuánto producir", "producir")
+        self._crear_fila(opciones, 2, "Cuánto producir - (Método Gráfico)", "producir")
         ttk.Separator(opciones, orient="horizontal").grid(
             row=3, column=0, columnspan=2, sticky="ew", pady=12
         )
