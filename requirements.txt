@@ -1,12 +1,18 @@
-# Dependencias del proyecto
-#
-# La aplicación (método gráfico y programación dinámica) usa Tkinter y la
-# biblioteca estándar de Python. Adicionalmente, la verificación cruzada de
-# resultados con SciPy necesita NumPy y SciPy.
-#
-# En Windows, Tkinter viene incluido con la instalación oficial de Python.
-# En Linux puede ser necesario instalarlo aparte:
-#   sudo apt install python3-tk
-
+colorama==0.4.6
+contourpy==1.4.0
+cycler==0.12.1
+fonttools==4.67.0
+iniconfig==2.3.1
+kiwisolver==1.5.1
+matplotlib==3.11.2
 numpy==2.5.4
+packaging==26.3
+pillow==13.0.0
+pluggy==1.7.0
+Pygments==2.21.0
+pyparsing==3.3.3
+pytest==9.1.1
+python-dateutil==3.0.0
+six==1.17.0
+tzdata==2026.5
 scipy==1.18.1
