@@ -1,66 +1,81 @@
 # Proyecto Final IO
 
-Aplicación educativa para resolver problemas de Investigación de Operaciones (IO) mediante el **método gráfico**. Implementada en Python con interfaz gráfica en Tkinter.
+Aplicación educativa de Investigación de Operaciones (IO) con interfaz gráfica en
+**Tkinter** para resolver dos tipos de problemas:
+
+- **Método gráfico** (programación lineal de 2 variables).
+- **Programación dinámica** (modelo de inventarios de café, procedimiento hacia atrás).
+
+Al iniciar, la aplicación muestra un menú de bienvenida donde se elige qué calcular.
 
 ## Características
 
-- **Método gráfico**: Captura de modelo matemático (variables, función objetivo, restricciones), graficado de restricciones en plano cartesiano, identificación de región factible, cálculo de vértices y obtención de solución óptima.
-- **Interfaz intuitiva**: Formulario para definir variables, número de restricciones, tipo de optimización (Maximizar/Minimizar), visualización en canvas interactivo.
-- **Validación de restricciones**: Soporta desigualdades `<=`, `>=`, `=`. Añade automáticamente restricciones de no-negatividad (`X1>=0`, `X2>=0`).
-- **Visualización completa**: Dibuja ejes, malla, líneas de restricción, puntos factibles y punto óptimo resaltado con su valor Z.
-- **Ejemplos precargados**: Incluye 3 ejemplos (editable, infactible, con óptimos alternativos) para facilitar el aprendizaje.
-- **Preparado para expansión**: Módulos separados (`src/grafico/`, `src/dinamica/`) para agregar programación dinámica próximamente.
+### Método gráfico (`Cuánto producir`)
+- Captura de variables, función objetivo y restricciones.
+- Soporta operadores `<=`, `>=`, `=` y agrega automáticamente la no-negatividad.
+- Dibuja ejes, malla, restricciones, región factible, vértices y punto óptimo.
+- Incluye 3 ejemplos precargados: editable, infactible y con óptimos alternativos.
+- Calcula el valor óptimo `Z` y muestra el detalle en un panel de resultados.
+
+### Programación dinámica (`Cuánto comprar`)
+- Modelo de inventarios de café con 1 a 8 etapas.
+- Parámetros globales: inventario inicial, inventario final, capacidad y paso de discretización.
+- Parámetros por etapa: demanda, precio de compra, costo de almacenamiento y compra máxima.
+- Resuelve con procedimiento hacia atrás y muestra las tablas paso a paso por etapa.
 
 ## Requerimientos
 
-### Software
-- Python 3.10+ (probado con Python 3.14.3)
-- pip (gestor de paquetes)
+- **Python 3.10 o superior** (probado con Python 3.14.3).
+- **Tkinter** (incluido en la instalación oficial de Python en Windows/macOS).
+  En Linux puede requerir el paquete del sistema:
+  ```bash
+  sudo apt install python3-tk
+  ```
 
-### Dependencias
-Ver `requirements.txt`:
-```
-matplotlib==3.11.2
-numpy==2.5.4
-pytest==9.1.1
-```
+El proyecto **no usa dependencias externas de Python**: todo se implementa con la
+biblioteca estándar (`tkinter`, `math`). Por eso `requirements.txt` solo contiene
+comentarios y `pip install -r requirements.txt` no instala paquetes adicionales.
 
-## Estructura de archivos
+## Estructura del proyecto
 
 ```
 Proyecto Final IO/
-├── .gitignore
-├── main.py                    # Punto de entrada desde raíz
+├── main.py                          # Punto de entrada (menú + paneles)
+├── estilos.py                       # Estilos globales de la interfaz
+├── requirements.txt                 # Sin dependencias externas
 ├── README.md
-├── requirements.txt
-├── estilos.py                 # Estilos globales de la interfaz
-├── data/                      # Datos de entrada/ejemplos
-│   └── ejemplos/
-├── docs/                      # Documentación
+├── docs/
 │   └── especificaciones-grafico.md
-├── src/
-│   ├── dinamica/              # Módulo para programación dinámica (en desarrollo)
-│   └── grafico/               # Módulo método gráfico
-│       ├── __init__.py
-│       ├── ejemplos/          # Módulo con ejemplos precargados
-│       │   ├── __init__.py
-│       │   └── ejemplos.py
-│       ├── logica_metodo_grafico.py  # Lógica de resolución y búsqueda de óptimo
-│       ├── logica_restricciones.py   # Generación dinámica de entradas de restricciones
-│       ├── panel_entrada.py          # Interfaz gráfica Tkinter
-│       └── plano_cartesiano.py       # Dibujo y visualización en canvas
-└── tests/                     # Pruebas unitarias (pytest)
+└── src/
+    ├── menu/
+    │   ├── __init__.py
+    │   └── menu.py                  # Menú de bienvenida
+    ├── grafico/                     # Método gráfico
+    │   ├── ejemplos/
+    │   │   ├── __init__.py
+    │   │   └── ejemplos.py          # Ejemplos precargados
+    │   ├── logica_metodo_grafico.py # Resolución y búsqueda del óptimo
+    │   ├── logica_restricciones.py  # Entradas dinámicas de restricciones
+    │   ├── panel_entrada.py         # Ventana principal del método gráfico
+    │   ├── panel_resultados.py      # Tabla de resultados
+    │   ├── plano_cartesiano.py      # Dibujo del plano y restricciones
+    │   └── visual_extra.py          # Sombreo de región factible y leyenda
+    └── dinamica/                    # Programación dinámica
+        ├── logica_programacion_dinamica.py  # Algoritmo hacia atrás
+        ├── panel_formulario.py              # Ventana principal de PD
+        └── panel_tablas.py                  # Tablas paso a paso
 ```
 
 ## Instalación
 
 ### 1. Clonar el repositorio
+
 ```bash
 git clone https://github.com/bryandelfin/Proyecto-Final-IO.git
-cd "Proyecto Final IO"
+cd Proyecto-Final-IO
 ```
 
-### 2. Crear y activar entorno virtual
+### 2. Crear y activar un entorno virtual (recomendado)
 
 **Windows (PowerShell):**
 ```powershell
@@ -68,63 +83,81 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-Si hay error de políticas de ejecución:
+Si PowerShell bloquea la activación:
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
 ```
 
-**Linux/MacOS:**
+**Linux/macOS:**
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 ```
 
 ### 3. Instalar dependencias
+
 ```bash
 pip install -r requirements.txt
 ```
 
+> No se instalan paquetes externos porque el proyecto solo usa la biblioteca
+> estándar. Asegúrate de tener Tkinter disponible (ver Requerimientos).
+
 ## Ejecución
 
-### Desde la raíz (recomendado)
+Desde la raíz del proyecto:
+
 ```bash
 python main.py
 ```
 
-Este comando iniciará la aplicación con los estilos globales aplicados.
+En Linux/macOS, si usaste `python3` para crear el entorno, ejecuta:
 
-### Desde el módulo gráfico (alternativo)
 ```bash
-cd src/grafico
-python panel_entrada.py
+python3 main.py
 ```
+
+Se abrirá el **menú de bienvenida**:
+
+1. Elige **"Cuánto producir"** para abrir el método gráfico.
+2. Elige **"Cuánto comprar"** para abrir programación dinámica.
+3. Dentro de cada panel puedes usar **"Volver al menú"** para regresar.
+
+> Ejecuta siempre `main.py` desde la raíz. Los módulos internos se cargan
+> agregando `src/` al `sys.path` automáticamente; no es necesario mover archivos.
 
 ## Uso de la aplicación
 
-1. **Definir función objetivo**: Selecciona `Maximizar` o `Minimizar`. Ingresa nombres y coeficientes de `X1` y `X2`.
-2. **Definir restricciones**: Selecciona número de restricciones (1-8) y pulsa `Generar`. Completa coeficientes, operador (`<=`, `>=`, `=`) y lado derecho.
-3. **Cargar ejemplos**: Usa el combobox "Ejemplos" para seleccionar entre los 3 ejemplos precargados (Editable, Infactible, Óptimos alternativos) y pulsa `Cargar Ejemplo`.
-4. **Resolver**: Pulsa `Resolver`. La aplicación graficará las restricciones, mostrará la región factible, puntos vértices y el punto óptimo con valor Z.
-5. **Limpiar**: Pulsa `Limpiar` para borrar todos los campos y reiniciar el plano.
+### Método gráfico ("Cuánto producir")
 
-## Buenas prácticas
+1. Selecciona **Maximizar** o **Minimizar** e ingresa los nombres y coeficientes de `X1` y `X2`.
+2. Indica el número de restricciones (1-8), pulsa **Generar** y completa coeficientes, operador y lado derecho.
+3. Opcionalmente, carga un ejemplo desde el combobox **Ejemplos**.
+4. Pulsa **Resolver** para graficar restricciones, región factible, vértices y solución óptima.
+5. Pulsa **Limpiar** para reiniciar los campos y el plano.
 
-- **Entorno aislado**: Usar `.venv/` para evitar conflictos de dependencias.
-- **Control de versiones**: Seguir convención de commits (`feat:`, `fix:`, `docs:`, `chore:`). No subir archivos generados (`__pycache__/`, `.venv/`).
-- **Modularidad**: Lógica separada de interfaz (`logica_metodo_grafico.py`) facilita pruebas y mantenimiento.
-- **Validación**: Se validan entradas numéricas, región factible y restricciones.
-- **Testing**: Ejecutar pruebas con `pytest` antes de hacer commit/push.
-- **Documentación**: Mantener `README.md` y `docs/` actualizados.
+### Programación dinámica ("Cuánto comprar")
 
-## Pruebas
+1. Completa los datos generales y los parámetros globales de inventario.
+2. Define el número de etapas (1-8) y pulsa **Generar Campos por Etapa**.
+3. Ingresa demanda, precio de compra, costo de almacenamiento y compra máxima por etapa.
+4. Pulsa **Resolver DP** para ver las tablas paso a paso en el panel derecho.
+5. Pulsa **Limpiar** para restaurar los valores por defecto.
 
-```bash
-pytest
-```
+## Solución de problemas
+
+- **`ModuleNotFoundError` al ejecutar un módulo interno**: ejecuta `python main.py`
+  desde la raíz del proyecto, no desde dentro de `src/`.
+- **`No module named tkinter` en Linux**: instala el paquete del sistema
+  (`sudo apt install python3-tk`) y vuelve a intentar.
+- **PowerShell no permite activar el entorno**: usa el comando de
+  `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` mostrado arriba.
+- **La aplicación no abre**: verifica que estés usando Python 3.10 o superior con
+  `python --version`.
 
 ## Tecnologías
 
-- [Python](https://www.python.org/) - Lenguaje base
-- [Tkinter](https://docs.python.org/3/library/tkinter.html) - Interfaz gráfica
-- [NumPy](https://numpy.org/), [Matplotlib](https://matplotlib.org/) - Soporte numérico/gráfico
-- [pytest](https://docs.pytest.org/) - Framework de pruebas
+- [Python](https://www.python.org/) 3.10+
+- [Tkinter](https://docs.python.org/3/library/tkinter.html) (interfaz gráfica)
+- `math` (biblioteca estándar para los cálculos)
